@@ -1,0 +1,631 @@
+{% extends "base.html" %}
+{% block title %}Register - CohabitAI{% endblock %}
+
+{% block content %}
+<section class="auth-section py-5" style="margin-top:80px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="glass-card p-4 p-lg-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold"><i class="bi bi-person-plus-fill text-accent me-2"></i>Create Your Profile
+                        </h2>
+                        <p class="text-muted">Complete the 5-step questionnaire for accurate AI compatibility matching
+                        </p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                        <!-- Step Indicators -->
+                        <div class="d-flex justify-content-center gap-2 flex-wrap mb-4">
+                            <span class="step-indicator active" data-step="1">1. Basic Identity</span>
+                            <span class="step-indicator" data-step="2">2. Lifestyle Habits</span>
+                            <span class="step-indicator" data-step="3">3. Personality Traits</span>
+                            <span class="step-indicator" data-step="4">4. Hard Constraints</span>
+                            <span class="step-indicator" data-step="5">5. Budget & Location</span>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="progress mb-4"
+                            style="height:4px; background:rgba(255,255,255,0.08); border-radius:4px;">
+                            <div class="progress-bar" id="progressBar" role="progressbar"
+                                style="width:20%; background:var(--accent); border-radius:4px;" aria-valuenow="20"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+
+                        <!-- ═══════════════════════════════════════ -->
+                        <!-- Step 1: Basic Identity                -->
+                        <!-- ═══════════════════════════════════════ -->
+                        <div class="form-step active" id="step-1">
+                            <div class="d-flex align-items-center mb-3 gap-2">
+                                <span class="timeline-number" style="width:36px;height:36px;font-size:.8rem;">01</span>
+                                <div>
+                                    <span class="timeline-label">BASIC IDENTITY</span>
+                                    <h5 class="fw-bold mb-0 mt-1">Who Are You?</h5>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-3">Core credentials and demographics that form your identity
+                                on the platform.</p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Full Name *</label>
+                                    <input type="text" name="full_name" class="form-control glass-input" required
+                                        placeholder="Your full name">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" name="email" class="form-control glass-input" required
+                                        placeholder="you@email.com">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Password *</label>
+                                    <input type="password" name="password" class="form-control glass-input" required
+                                        minlength="6" placeholder="Min 6 characters">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone</label>
+                                    <input type="tel" name="phone" class="form-control glass-input"
+                                        placeholder="+91 XXXXX XXXXX">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Age *</label>
+                                    <input type="number" name="age" class="form-control glass-input" required min="18"
+                                        max="65" placeholder="Age">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Gender *</label>
+                                    <select name="gender" class="form-select glass-input" required>
+                                        <option value="">Select...</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="non-binary">Non-binary</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Occupation *</label>
+                                    <select name="occupation" class="form-select glass-input" required>
+                                        <option value="">Select...</option>
+                                        <option value="student">Student</option>
+                                        <option value="working_professional">Working Professional</option>
+                                        <option value="freelancer">Freelancer</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Short Bio</label>
+                                    <textarea name="bio" class="form-control glass-input" rows="2"
+                                        placeholder="Tell potential roommates about yourself..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ═══════════════════════════════════════ -->
+                        <!-- Step 2: Lifestyle Habits (AI-Generated MCQs) -->
+                        <!-- ═══════════════════════════════════════ -->
+                        <div class="form-step" id="step-2">
+                            <div class="d-flex align-items-center mb-3 gap-2">
+                                <span class="timeline-number" style="width:36px;height:36px;font-size:.8rem;">02</span>
+                                <div>
+                                    <span class="timeline-label">LIFESTYLE HABITS</span>
+                                    <h5 class="fw-bold mb-0 mt-1">How Do You Live?</h5>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-4">These dimensions carry the <strong>highest weight</strong>
+                                in our AI compatibility engine. AI-generated questions help us understand you better!
+                                <small class="d-block mt-1">⏳ Loading questions...</small></p>
+
+                            <!-- Hidden fields for computed feature scores -->
+                            <input type="hidden" name="sleep_schedule" id="feature-value-sleep_schedule" value="3">
+                            <input type="hidden" name="cleanliness" id="feature-value-cleanliness" value="3">
+                            <input type="hidden" name="noise_tolerance" id="feature-value-noise_tolerance" value="3">
+                            <input type="hidden" name="cooking_frequency" id="feature-value-cooking_frequency"
+                                value="3">
+                            <input type="hidden" name="guest_frequency" id="feature-value-guest_frequency" value="3">
+                            <input type="hidden" name="workout_habit" id="feature-value-workout_habit" value="3">
+
+                            <!-- Dynamic questionnaire container -->
+                            <div id="lifestyleQuestionnaire" class="row g-4">
+                                <span class="text-muted text-center w-100"><i class="bi bi-hourglass-split"></i> Loading
+                                    AI questions...</span>
+                            </div>
+                        </div>
+
+                        <!-- ═══════════════════════════════════════ -->
+                        <!-- Step 3: Personality Traits (AI-Generated MCQs) -->
+                        <!-- ═══════════════════════════════════════ -->
+                        <div class="form-step" id="step-3">
+                            <div class="d-flex align-items-center mb-3 gap-2">
+                                <span class="timeline-number" style="width:36px;height:36px;font-size:.8rem;">03</span>
+                                <div>
+                                    <span class="timeline-label">PERSONALITY TRAITS</span>
+                                    <h5 class="fw-bold mb-0 mt-1">What Makes You, You?</h5>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-4">Personality alignment predicts long-term co-living harmony.
+                                <small class="d-block mt-1">⏳ Loading questions...</small></p>
+
+                            <!-- Hidden fields for computed feature scores -->
+                            <input type="hidden" name="introversion_extroversion"
+                                id="feature-value-introversion_extroversion" value="3">
+                            <input type="hidden" name="communication_style" id="feature-value-communication_style"
+                                value="3">
+                            <input type="hidden" name="conflict_resolution" id="feature-value-conflict_resolution"
+                                value="3">
+                            <input type="hidden" name="social_battery" id="feature-value-social_battery" value="3">
+
+                            <!-- Dynamic questionnaire container -->
+                            <div id="personalityQuestionnaire" class="row g-4">
+                                <span class="text-muted text-center w-100"><i class="bi bi-hourglass-split"></i> Loading
+                                    AI questions...</span>
+                            </div>
+                        </div>
+
+                        <!-- ═══════════════════════════════════════ -->
+                        <!-- Step 4: Hard Constraints                -->
+                        <!-- ═══════════════════════════════════════ -->
+                        <div class="form-step" id="step-4">
+                            <div class="d-flex align-items-center mb-3 gap-2">
+                                <span class="timeline-number" style="width:36px;height:36px;font-size:.8rem;">04</span>
+                                <div>
+                                    <span class="timeline-label">HARD CONSTRAINTS</span>
+                                    <h5 class="fw-bold mb-0 mt-1">Non-Negotiable Deal Breakers</h5>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-4">These are pass/fail filters — mismatches eliminate
+                                candidates before scoring.</p>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label"><i class="bi bi-fire me-1 text-danger"></i>Smoking</label>
+                                    <select name="smoking" class="form-select glass-input">
+                                        <option value="never">Never</option>
+                                        <option value="occasionally">Occasionally</option>
+                                        <option value="regularly">Regularly</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label"><i
+                                            class="bi bi-cup-straw me-1 text-warning"></i>Drinking</label>
+                                    <select name="drinking" class="form-select glass-input">
+                                        <option value="never">Never</option>
+                                        <option value="occasionally">Occasionally</option>
+                                        <option value="regularly">Regularly</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label"><i class="bi bi-egg-fried me-1 text-success"></i>Food
+                                        Preference</label>
+                                    <select name="veg_nonveg" class="form-select glass-input">
+                                        <option value="nonveg">Non-Vegetarian</option>
+                                        <option value="veg">Vegetarian</option>
+                                        <option value="eggetarian">Eggetarian</option>
+                                        <option value="vegan">Vegan</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label"><i class="bi bi-people me-1 text-info"></i>Gender
+                                        Preference (Roommate)</label>
+                                    <select name="gender_preference" class="form-select glass-input">
+                                        <option value="any">Any Gender</option>
+                                        <option value="male">Male Only</option>
+                                        <option value="female">Female Only</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end">
+                                    <div class="form-check form-switch ps-0 d-flex align-items-center gap-3">
+                                        <div>
+                                            <input class="form-check-input ms-0" type="checkbox" name="pet_friendly"
+                                                id="petFriendly" style="width:3em;height:1.5em;">
+                                        </div>
+                                        <label class="form-check-label fs-6" for="petFriendly">Pet Friendly 🐾</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ═══════════════════════════════════════ -->
+                        <!-- Step 5: Budget + Dual Location           -->
+                        <!-- ═══════════════════════════════════════ -->
+                        <div class="form-step" id="step-5">
+                            <div class="d-flex align-items-center mb-3 gap-2">
+                                <span class="timeline-number" style="width:36px;height:36px;font-size:.8rem;">05</span>
+                                <div>
+                                    <span class="timeline-label">BUDGET & LOCATION</span>
+                                    <h5 class="fw-bold mb-0 mt-1">Budget + Home & PG Locations</h5>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-3">Set budget plus both locations: where you are from and
+                                where you want to take PG.</p>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label"><i class="bi bi-currency-rupee me-1"></i>Budget Min
+                                        (₹/month)</label>
+                                    <input type="number" name="budget_min" class="form-control glass-input"
+                                        placeholder="e.g. 5000">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label"><i class="bi bi-currency-rupee me-1"></i>Budget Max
+                                        (₹/month)</label>
+                                    <input type="number" name="budget_max" class="form-control glass-input"
+                                        placeholder="e.g. 15000">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label"><i class="bi bi-calendar-check me-1"></i>Move-in
+                                        Timeline</label>
+                                    <select name="preferred_move_in" class="form-select glass-input">
+                                        <option value="flexible">Flexible</option>
+                                        <option value="immediate">Immediate</option>
+                                        <option value="within_month">Within a Month</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label"><i class="bi bi-house-heart me-1"></i>Home City (Where you
+                                        are from) *</label>
+                                    <input type="text" name="home_city" class="form-control glass-input" required
+                                        placeholder="e.g. Burdwan, West Bengal">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label"><i class="bi bi-pin-map me-1"></i>Home Locality /
+                                        District</label>
+                                    <input type="text" name="home_locality" class="form-control glass-input"
+                                        placeholder="e.g. Golapbag">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label"><i class="bi bi-building-check me-1"></i>Preferred PG City
+                                        *</label>
+                                    <input type="text" name="city" class="form-control glass-input" required
+                                        placeholder="e.g. Kolkata">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label"><i class="bi bi-geo me-1"></i>Preferred PG Locality /
+                                        Area</label>
+                                    <input type="text" name="locality" class="form-control glass-input"
+                                        placeholder="e.g. Salt Lake Sector V">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label"><i class="bi bi-tags me-1"></i>Interests
+                                        (comma-separated)</label>
+                                    <input type="text" name="interests" class="form-control glass-input"
+                                        placeholder="e.g. Gaming, Reading, Hiking, Cooking, Music">
+                                </div>
+
+                                <!-- Hidden location fields -->
+                                <input type="hidden" name="latitude" id="reg-lat" value="">
+                                <input type="hidden" name="longitude" id="reg-lng" value="">
+                                <input type="hidden" name="home_latitude" id="home-lat" value="">
+                                <input type="hidden" name="home_longitude" id="home-lng" value="">
+
+                                <div class="col-md-6">
+                                    <label class="form-label"><i class="bi bi-house-door me-1"></i>Pin Home
+                                        Location</label>
+                                    <div id="home-map"
+                                        style="height:220px; border-radius:12px; border: 1px solid rgba(255,255,255,0.1);">
+                                    </div>
+                                    <small class="text-muted">Click to set your current/home location.</small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label"><i class="bi bi-building me-1"></i>Pin Preferred PG
+                                        Location</label>
+                                    <div id="reg-map"
+                                        style="height:220px; border-radius:12px; border: 1px solid rgba(255,255,255,0.1);">
+                                    </div>
+                                    <small class="text-muted">Click to set where you want to find PG/roommate.</small>
+                                </div>
+
+                                <!-- Profile Photo Upload (visual placeholder) -->
+                                <div class="col-12">
+                                    <label class="form-label"><i class="bi bi-camera me-1"></i>Profile Photo</label>
+                                    <div class="glass-card p-4 text-center"
+                                        style="border: 2px dashed rgba(166,130,255,0.3); border-radius:12px; cursor:pointer;"
+                                        id="photoDropzone">
+                                        <i class="bi bi-cloud-arrow-up display-5 text-accent d-block mb-2"></i>
+                                        <p class="mb-1 text-muted">Drag &amp; drop or click to upload</p>
+                                        <small class="text-muted">JPG, PNG — Max 5MB (optional for demo)</small>
+                                        <input type="file" name="profile_photo" accept="image/*" class="d-none"
+                                            id="photoInput">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div
+                            class="d-flex justify-content-between mt-4 pt-3 border-top border-secondary border-opacity-25">
+                            <button type="button" class="btn btn-outline-secondary" id="prevBtn"
+                                onclick="changeStep(-1)" style="display:none;">
+                                <i class="bi bi-arrow-left me-1"></i>Previous
+                            </button>
+                            <div class="ms-auto d-flex gap-2 align-items-center">
+                                <small class="text-muted me-2" id="stepCounter">Step 1 of 5</small>
+                                <button type="button" class="btn btn-accent" id="nextBtn" onclick="changeStep(1)">
+                                    Next<i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                                <button type="submit" class="btn btn-success px-4" id="submitBtn" style="display:none;">
+                                    <i class="bi bi-check-circle me-1"></i>Create Profile
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">Already have an account? <a href="{{ url_for('login') }}"
+                                class="text-accent">Log in</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentStep = 1;
+    const totalSteps = 5;
+
+    // ============================================
+    // Questionnaire data from API
+    // ============================================
+    let questionnaireData = null;
+
+    // Define which features belong to which step
+    const stepFeatures = {
+        2: ['sleep_schedule', 'cleanliness', 'noise_tolerance', 'cooking_frequency', 'guest_frequency', 'workout_habit'],
+        3: ['introversion_extroversion', 'communication_style', 'conflict_resolution', 'social_battery']
+    };
+
+    // ============================================
+    // Load questionnaire from API
+    // ============================================
+    async function loadQuestionnaire() {
+        try {
+            const response = await fetch('/api/register-questionnaire');
+            if (!response.ok) throw new Error('Failed to load questionnaire');
+            questionnaireData = await response.json();
+            console.log('✓ Questionnaire loaded:', questionnaireData);
+
+            // Render Step 2 and 3 questionnaires
+            renderQuestionnaire(2);
+            renderQuestionnaire(3);
+        } catch (error) {
+            console.error('✗ Error loading questionnaire:', error);
+            document.getElementById('lifestyleQuestionnaire').innerHTML = `<div class="alert alert-warning w-100">Failed to load questions. Using defaults.</div>`;
+            document.getElementById('personalityQuestionnaire').innerHTML = `<div class="alert alert-warning w-100">Failed to load questions. Using defaults.</div>`;
+        }
+    }
+
+    // ============================================
+    // Render MCQ questions for a step
+    // ============================================
+    function renderQuestionnaire(step) {
+        if (!questionnaireData) return;
+
+        const containerId = step === 2 ? 'lifestyleQuestionnaire' : 'personalityQuestionnaire';
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        const featuresList = stepFeatures[step];
+
+        featuresList.forEach(featureKey => {
+            const featureData = questionnaireData.segments.find(s => s.key === featureKey);
+            if (!featureData) return;
+
+            const questions = questionnaireData.questions[featureKey] || [];
+            const optionsMap = questionnaireData.mcq_options || {
+                1: 'Strongly Disagree',
+                2: 'Disagree',
+                3: 'Neutral',
+                4: 'Agree',
+                5: 'Strongly Agree'
+            };
+            const options = Object.entries(optionsMap).map(([score, text]) => ({
+                score: Number(score),
+                text: text,
+            }));
+
+            const featureDiv = document.createElement('div');
+            featureDiv.className = 'col-12';
+            featureDiv.innerHTML = `
+            <div class="glass-card p-3 ps-4" style="border-left: 3px solid var(--accent); border-radius: 8px; margin-bottom: 1.5rem;">
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-1 text-accent">${featureData.label}</h6>
+                    <p class="text-muted small mb-0">Answer all 3 MCQs to set your profile score.</p>
+                </div>
+                <div class="feature-questions-group" id="feature-questions-${featureKey}"></div>
+            </div>
+        `;
+            container.appendChild(featureDiv);
+
+            const questionsContainer = document.getElementById(`feature-questions-${featureKey}`);
+
+            questions.forEach((q, qIdx) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'mb-3';
+                questionDiv.innerHTML = `
+                <label class="fw-semibold text-muted small mb-2 d-block">Q${qIdx + 1}: ${q}</label>
+                <div class="question-options-group" data-feature="${featureKey}" data-question-idx="${qIdx}">
+                    ${options.map((opt, oIdx) => `
+                        <div class="form-check mb-2">
+                            <input 
+                                class="form-check-input mcq-option" 
+                                type="radio" 
+                                name="q-${featureKey}-${qIdx}" 
+                                id="q-${featureKey}-${qIdx}-${oIdx}"
+                                value="${opt.score}"
+                                data-feature="${featureKey}"
+                                data-question-idx="${qIdx}"
+                            >
+                            <label class="form-check-label ps-2" for="q-${featureKey}-${qIdx}-${oIdx}">
+                                ${opt.text}
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+                questionsContainer.appendChild(questionDiv);
+            });
+        });
+
+        // Attach event listeners for radio changes
+        attachMCQListeners();
+    }
+
+    // ============================================
+    // Attach event listeners to MCQ options
+    // ============================================
+    function attachMCQListeners() {
+        document.querySelectorAll('.mcq-option').forEach(option => {
+            option.addEventListener('change', () => {
+                const featureKey = option.dataset.feature;
+                averageFeatureScore(featureKey);
+            });
+        });
+    }
+
+    // ============================================
+    // Calculate average score for a feature
+    // ============================================
+    function averageFeatureScore(featureKey) {
+        const checkedOptions = document.querySelectorAll(
+            `.mcq-option[data-feature="${featureKey}"]:checked`
+        );
+
+        const hidden = document.getElementById(`feature-value-${featureKey}`);
+        if (!hidden) return;
+
+        if (checkedOptions.length === 0) {
+            hidden.value = '3';
+            return;
+        }
+
+        let totalScore = 0;
+        checkedOptions.forEach(option => {
+            totalScore += parseInt(option.value, 10);
+        });
+
+        const avgScore = Math.round(totalScore / checkedOptions.length);
+        hidden.value = String(avgScore);
+        console.log(`Updated ${featureKey}: ${avgScore} (from ${checkedOptions.length} questions)`);
+    }
+
+    // ============================================
+    // Validate all questions answered for a step
+    // ============================================
+    function ensureQuestionnaireStepAnswered(step) {
+        if (!questionnaireData || !stepFeatures[step]) return true;
+
+        const featuresList = stepFeatures[step];
+        const questionnaireData_local = questionnaireData;
+
+        for (const featureKey of featuresList) {
+            const questions = questionnaireData_local.questions[featureKey] || [];
+
+            for (let qIdx = 0; qIdx < questions.length; qIdx++) {
+                const isChecked = document.querySelector(
+                    `input[name="q-${featureKey}-${qIdx}"]:checked`
+                );
+
+                if (!isChecked) {
+                    alert(`Please answer all questions for ${featureKey.replace(/_/g, ' ')}.`);
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // ============================================
+    // Navigation with validation
+    // ============================================
+    function changeStep(direction) {
+        // Validate questionnaire before leaving
+        if (currentStep === 2 && direction > 0 && !ensureQuestionnaireStepAnswered(2)) return;
+        if (currentStep === 3 && direction > 0 && !ensureQuestionnaireStepAnswered(3)) return;
+
+        const steps = document.querySelectorAll('.form-step');
+        const indicators = document.querySelectorAll('.step-indicator');
+
+        steps[currentStep - 1].classList.remove('active');
+        indicators[currentStep - 1].classList.remove('active');
+
+        currentStep += direction;
+
+        steps[currentStep - 1].classList.add('active');
+        indicators[currentStep - 1].classList.add('active');
+
+        document.getElementById('prevBtn').style.display = currentStep === 1 ? 'none' : 'inline-block';
+        document.getElementById('nextBtn').style.display = currentStep === totalSteps ? 'none' : 'inline-block';
+        document.getElementById('submitBtn').style.display = currentStep === totalSteps ? 'inline-block' : 'none';
+        document.getElementById('stepCounter').textContent = `Step ${currentStep} of ${totalSteps}`;
+        document.getElementById('progressBar').style.width = `${(currentStep / totalSteps) * 100}%`;
+
+        // Scroll to top of form
+        document.getElementById('registerForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Location Map (lazy-init when Step 5 is reached)
+    let mapInitialized = false;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Load questionnaire on page load
+        loadQuestionnaire();
+
+        // Photo upload click handler
+        const dropzone = document.getElementById('photoDropzone');
+        const photoInput = document.getElementById('photoInput');
+        if (dropzone && photoInput) {
+            dropzone.addEventListener('click', () => photoInput.click());
+            photoInput.addEventListener('change', () => {
+                if (photoInput.files.length) {
+                    dropzone.querySelector('p').textContent = photoInput.files[0].name;
+                    dropzone.querySelector('i').className = 'bi bi-check-circle display-5 text-success d-block mb-2';
+                }
+            });
+        }
+
+        // Observer for map initialization when step-5 becomes visible
+        const observer = new MutationObserver(() => {
+            const step5 = document.getElementById('step-5');
+            if (step5 && step5.classList.contains('active') && !mapInitialized) {
+                mapInitialized = true;
+                setTimeout(initRegMap, 200);
+            }
+        });
+        observer.observe(document.getElementById('registerForm'), { subtree: true, attributes: true, attributeFilter: ['class'] });
+    });
+
+    function initRegMap() {
+        const pgMap = L.map('reg-map').setView([22.5726, 88.3639], 11);
+        const homeMap = L.map('home-map').setView([22.5726, 88.3639], 11);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(pgMap);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(homeMap);
+
+        let pgMarker = null;
+        let homeMarker = null;
+
+        pgMap.on('click', function (e) {
+            if (pgMarker) pgMap.removeLayer(pgMarker);
+            pgMarker = L.marker(e.latlng).addTo(pgMap);
+            document.getElementById('reg-lat').value = e.latlng.lat.toFixed(6);
+            document.getElementById('reg-lng').value = e.latlng.lng.toFixed(6);
+        });
+
+        homeMap.on('click', function (e) {
+            if (homeMarker) homeMap.removeLayer(homeMarker);
+            homeMarker = L.marker(e.latlng).addTo(homeMap);
+            document.getElementById('home-lat').value = e.latlng.lat.toFixed(6);
+            document.getElementById('home-lng').value = e.latlng.lng.toFixed(6);
+        });
+
+        setTimeout(() => {
+            pgMap.invalidateSize();
+            homeMap.invalidateSize();
+        }, 300);
+    }
+</script>
+{% endblock %}
